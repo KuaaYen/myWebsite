@@ -20,6 +20,31 @@ async function init(){
     const paginationBar = document.querySelector('.pagination-bar');
     common.highlightPageBtnNow(paginationBar, 'about me');
 
+    var currentSection = allSections[0];
+
+
+    
+    const infoContainer = document.querySelector('.info-text');
+    const outerDiv = document.querySelector('body');
+
+    infoContainer.addEventListener('wheel', function(event) {
+        detectScrollTop(infoContainer, event);
+        detectScrollEnd(infoContainer, event);
+    });
+
+    function detectScrollEnd(container, event){
+        if (container.scrollHeight - container.scrollTop === container.clientHeight && event.deltaY > 0) {
+            event.preventDefault();
+            btnNextSection.click();
+        }
+    }
+    function detectScrollTop(container, event){
+        if (container.scrollTop === 0 && event.deltaY < 0){
+            event.preventDefault();
+            btnPrevSection.click();
+        }
+    }
+
     // get skill data from back-end and create blocks
     const skillData = await common.getData('/YCDev/about_me/getInfo');
     createSkillBlock(skillData);
@@ -45,7 +70,7 @@ async function init(){
                 nameBlock.classList.add('skill-name');
                 nameBlock.textContent = skillname;
                 descBlock.classList.add('skill-desc');
-                descBlock.classList.add('desc-scrollbar');
+                // descBlock.classList.add('desc-scrollbar');
                 descBlock.innerHTML = skillDesc;
                 // descBlock.textContent = skillDesc;
 
@@ -55,6 +80,11 @@ async function init(){
                 descSection.append(nameBlock);
                 descSection.append(descBlock);
             })
+
+            descSection.addEventListener('wheel', function(event) {
+                detectScrollTop(descSection, event);
+                detectScrollEnd(descSection, event);
+            });            
         }
     }
 
@@ -65,16 +95,16 @@ async function init(){
         threshold: 0.5 // when observed item's visable percentage is over 50% trigger event
     };
 
-    var currentSection = allSections[0];
 
     createNavigateBtn();
 
     const observer = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             const navBtn = document.querySelector(`[destination="${entry.target.id}"]`);
-            currentSection = entry.target;
-            const skillWrapper = currentSection.querySelector('.skill-wrapper');
+            const sectionInview = entry.target;
+            const skillWrapper = sectionInview.querySelector('.skill-wrapper');
             if (entry.isIntersecting) {
+                currentSection = entry.target;
                 navBtn.classList.add('active-btn');
                 if(skillWrapper){
                     skillWrapper.classList.add('skill-active');
